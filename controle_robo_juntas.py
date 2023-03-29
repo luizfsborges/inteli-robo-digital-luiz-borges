@@ -20,11 +20,13 @@ async def echo(websocket, path):
             print("Received message from client: " + message.decode("UTF-8"))
 
             await websocket.send("You said: " + message.decode("UTF-8"))
+            print("Enviando mensagem para cliente: " + message.decode("UTF-8"))
 
             # Send a response to all connected clients except sender
             for conn in connected:
                 if conn != websocket:
-                    await conn.send("Someone said: " + message)
+                    await conn.send("Você disse: " + message)
+                    
     # Handle disconnecting clients 
     except websockets.exceptions.ConnectionClosed as e:
         print("A client just disconnected")
