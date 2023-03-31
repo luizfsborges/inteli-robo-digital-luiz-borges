@@ -1,13 +1,31 @@
 import asyncio
 import websockets
 
+dict_deslocamento = {"X": [], "Y": [], "Z": []}
+
+def armazena_coordenadas(mensagem_recebida, dict_coordenadas):
+    # Recebe uma mensagem do tipo "X:coordanda:Y:coordenada:Z:coordenada" e armazena os valores em uma lista
+    
+    coordenadas = mensagem_recebida.strip('"').split(":")
+
+    for i in range(0, len(coordenadas), 2):
+        dict_coordenadas[coordenadas[i]].append(coordenadas[i+1])
+
+
+    return dict_coordenadas
+
 async def server(websocket, path):
     print("\nUm cliente acabou de se conectar")
     try:
         async for mensagem in websocket:
             mensagem_recebida = mensagem.decode("UTF-8")            
             print(f"\nMensagem recebida do cliente: {mensagem_recebida}")
-            await websocket.send(f"Você disse: {mensagem_recebida}")
+
+            deslocamento_garra = armazena_coordenadas(mensagem_recebida, dict_deslocamento)
+            print(f"\nDeslocamento da garra: {deslocamento_garra}")
+
+
+            await websocket.send(mensagem_recebida)
             print(f"\nMensagem enviada para o cliente: {mensagem_recebida}")
 
     except websockets.exceptions.ConnectionClosed as e:

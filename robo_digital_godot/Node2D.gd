@@ -9,7 +9,6 @@ func _ready():
 	#client.connect("connection_established", self, "connection_established")
 	client.connect("data_received", self, "mensagem_recebida")
 	
-	
 	var erro = client.connect_to_url(url)
 	
 	if erro!= OK:
@@ -35,18 +34,27 @@ func _process(delta):
 	elif $Button_abaixar.pressed:
 		decrementar_z()
 	
-func mostra_coordenada_x(coordenada_x):
-	get_node("LineEditCoordenadaX").set_text(str(coordenada_x))
+func exibe_feedback(mensagem_retorno):
+	get_node("Label_feedback_coordenadas").set_text(str(mensagem_retorno))
 	
 func mensagem_recebida():
 	var mensagem = client.get_peer(1).get_packet().get_string_from_utf8()
-	mostra_coordenada_x(mensagem)
+	exibe_feedback(mensagem)
+	
+	var movimentos = mensagem.replace('"', '').split(":")
+	var movimento_x = float(movimentos[1])
+	var movimento_y = float(movimentos[3])
+	var movimento_z = float(movimentos[5])
+	
+	$Sprite_garra.move_local_x(movimento_x)
+	$Sprite_garra.move_local_y(movimento_y)
+	$Sprite_garra.scale.x = movimento_z*0.01
+	$Sprite_garra.scale.y = movimento_z*0.01
+	
 
 func manda_mensagem(mensagem_enviada):
 	client.get_peer(1).put_packet(JSON.print(mensagem_enviada).to_utf8())
 	
-func _on_ButtonEnvio_pressed():
-	manda_mensagem(get_node("LineEditComandoX").text)
 
 var incremento_x = 0
 func incrementar_x():
