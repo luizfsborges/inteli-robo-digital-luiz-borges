@@ -13,9 +13,9 @@ O projeto Robô Digital tem por objetivo a elaboração de uma solução complet
 Para este entregável, espera-se que o estudante possa desenvolver a etapa de simulação do projeto.
 
 Para a solução da questão proposta, espera-se encontrar:  
-(Até 1.5 Ponto) - Implementação da simulação da cadeia cinemática do robô.
-(Até 0.5 Ponto) - Utilização correta da API desenvolvida.
-(Até 1.0 Ponto) - Documentação do sistema proposto.
+- (Até 1.5 Ponto) - Implementação da simulação da cadeia cinemática do robô.
+- (Até 0.5 Ponto) - Utilização correta da API desenvolvida.
+- (Até 1.0 Ponto) - Documentação do sistema proposto.
 
 ## Desenvolvimento 
 
