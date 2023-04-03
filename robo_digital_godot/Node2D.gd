@@ -1,30 +1,30 @@
 extends Node2D
 
+# Criação das variaveis para conexão com o servidor
 var client = WebSocketClient.new()
 var url = "ws://localhost:5000"
 
+# Definicação das variáveis de inicialização da garra
 var zero_x = 695
 var zero_y = 0.4
 var zero_y_conversao = 650
 var zero_z = 400
 
+# Definição dos limites de movimento da garra
 var limite_x_direita = 950
 var limite_x_esquerda = 460
 
 var limite_y_frente_real = 0.9
 var limite_y_tras_real = 0.2
-
 var limite_y_frente_conversao = 900
 var limite_y_tras_conversao = 400
-
 
 var limite_z_cima = 130
 var limite_z_baixo = 400
 
+# Função de setup para conexão com o servidor e definição de coordenadas iniciais
 func _ready():
-	#client.connect("connection_closed", self, "connection_closed")
-	#client.connect("connection_error", self, "connection_error")
-	#client.connect("connection_established", self, "connection_established")
+	
 	client.connect("data_received", self, "mensagem_recebida")
 	
 	var erro = client.connect_to_url(url)
@@ -42,6 +42,7 @@ func _ready():
 	
 	$Sprite_garra.position = Vector2(zero_x, zero_z)
 
+# Inicializa as funções concatenadas no poll e verifica a todo instante se os botões de ação da interface foram pressionados
 func _process(delta):
 	
 	client.poll()
@@ -59,10 +60,12 @@ func _process(delta):
 	elif $Button_abaixar.pressed:
 		decrementar_z()
 
+# Exibe a mensagem enviada pelo servidor
 func exibe_feedback(mensagem_retorno):
 	var mensagem_exibicao = str(mensagem_retorno.replace('"', '').replace(':', ': '))
 	get_node("Label_feedback_coordenadas").set_text(mensagem_exibicao)
 	
+# Função que reconhece quando o servidor envia uma mensagem e executa o movimento da garra baseada no processamento da mensagem recebida
 func mensagem_recebida():
 	var mensagem = client.get_peer(1).get_packet().get_string_from_utf8()
 	exibe_feedback(mensagem)
@@ -78,9 +81,12 @@ func mensagem_recebida():
 	mover_garra(x_atual, zero_y_conversao, z_atual, movimento_x, \
 				movimento_y, movimento_z, $Sprite_garra)
 
+# Função de envio de mensagens para o servidor
 func manda_mensagem(mensagem_enviada):
 	client.get_peer(1).put_packet(JSON.print(mensagem_enviada).to_utf8())
 	
+# As funções abaixo incrementam ou decrementam as variáveis de movimento da garra de acordo com cada chamada, que são disparadas quando os botões de ação da interface são pressionados
+
 var incremento_x = zero_x
 func incrementar_x():
 	if incremento_x <= limite_x_direita:
@@ -126,6 +132,7 @@ func decrementar_z():
 	else:
 		get_node("Label_Z").get_child(0).set_text(str(limite_z_cima))
 		
+# Função que é acionada quando o botão de "ENVIAR COORDENADAS" é pressionado, reunindo e enciando as coordenadas de movimento da garra para o servidor
 func _on_Button_enviar_pressed():
 	var coordenada_x = get_node("Label_X").get_child(0).text
 	var coordenada_y = get_node("Label_Y").get_child(0).text
@@ -134,14 +141,14 @@ func _on_Button_enviar_pressed():
 	coordenada_y + ":Z:" + coordenada_z
 	manda_mensagem(coordenadas_movimentacao)
 	
-
+# Função que remapeia os valores de entrada para os valores de saída, de acordo com cada intervalo especificado
 func mapear(x, in_min, in_max, out_min, out_max):
-		
 	var valor_dimensionado = (x - in_min) * (out_max - out_min) \
 								 / (in_max - in_min) + out_min
 							
 	return valor_dimensionado
 	
+# Função que realiza o movimento da garra de acordo com as coordenadas recebidas do servidor, verificando qual coordenada sofreu alteração e atualizando a posição da garra de acordo com o deslocamento nas ordens de x, y e z
 func mover_garra(posicao_atual_x, posicao_atual_y, posicao_atual_z, \
 				posicao_x, posicao_y, posicao_z, sprite_movimentacao):
 
@@ -187,5 +194,3 @@ func mover_garra(posicao_atual_x, posicao_atual_y, posicao_atual_z, \
 				posicao_atual_z-=1
 				sprite_movimentacao.position = Vector2(posicao_atual_x, posicao_atual_z)
 			yield(get_tree().create_timer(0.01), "timeout")
-			
-		
